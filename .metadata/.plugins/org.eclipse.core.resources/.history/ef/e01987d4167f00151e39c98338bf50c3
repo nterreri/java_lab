@@ -1,0 +1,86 @@
+package currency;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class CurrencyFrame extends JFrame {
+
+	/**
+	 * adding serialVersionUID avoids a warning (?)
+	 */
+	private static final long serialVersionUID = 122380596439679935L;
+	private JPanel contentPane;
+	private JComboBox<String> currencyFromSelection;
+	private Currency currencyFrom;
+	private JComboBox currencyToSelection;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					CurrencyFrame frame = new CurrencyFrame();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public CurrencyFrame() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 402, 295);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblCurrencyConverter = new JLabel("Currency Converter");
+		lblCurrencyConverter.setBounds(5, 5, 438, 15);
+		contentPane.add(lblCurrencyConverter);
+		
+		currencyFromSelection = new JComboBox<String>();
+		currencyFromSelection.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//User selects item from left combobox:
+				String selectedCurrency = 
+						(String)currencyFromSelection.getSelectedItem();
+				//Constructor using name is called (Currency(String)):
+				currencyFrom = new Currency(selectedCurrency);
+			}
+		});
+		currencyFromSelection.setModel(new DefaultComboBoxModel(new String[] {"", "GBP", "USD", "YEN", "EUR"}));
+		currencyFromSelection.setBounds(5, 82, 149, 24);
+		contentPane.add(currencyFromSelection);
+		
+		JLabel lblConvertFrom = new JLabel("Convert from:");
+		lblConvertFrom.setBounds(5, 55, 149, 15);
+		contentPane.add(lblConvertFrom);
+		
+		JLabel lblConvertTo = new JLabel("Convert to:");
+		lblConvertTo.setBounds(237, 55, 106, 15);
+		contentPane.add(lblConvertTo);
+		
+		currencyToSelection = new JComboBox();
+		currencyToSelection.setModel(new DefaultComboBoxModel(new String[] {"", "GBP", "USD", "YEN", "EUR"}));
+		currencyToSelection.setBounds(237, 82, 161, 24);
+		contentPane.add(currencyToSelection);
+		
+		
+	}
+}

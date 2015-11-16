@@ -1,0 +1,16 @@
+package uk.ac.ucl.cs.nterreri.chessboard;
+
+import java.util.logging.ConsoleHandler;
+
+public class ChessConsoleHandler extends ConsoleHandler{
+	public ChessConsoleHandler(0) {
+		super();
+		setOutputStream(System.out);
+	}
+	
+	public ChessConsoleHandler(1) {
+		super();
+		setOutputStream(System.out);
+	}
+
+}

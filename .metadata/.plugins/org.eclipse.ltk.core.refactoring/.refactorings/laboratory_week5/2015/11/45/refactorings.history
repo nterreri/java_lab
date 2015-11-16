@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;uk.ac.ucl.cs.nterreri.chessboard.chessboard&apos; to &apos;Chessboard&apos;&#x0A;- Original project: &apos;laboratory_week5&apos;&#x0A;- Original element: &apos;uk.ac.ucl.cs.nterreri.chessboard.chessboard&apos;&#x0A;- Renamed element: &apos;uk.ac.ucl.cs.nterreri.chessboard.Chessboard&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;chessboard&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;uk.ac.ucl.cs.nterreri.chessboard{chessboard.java[chessboard" matchStrategy="1" name="Chessboard" qualified="false" references="true" similarDeclarations="false" stamp="1446895951336" textual="false" version="1.0"/>
+</session>

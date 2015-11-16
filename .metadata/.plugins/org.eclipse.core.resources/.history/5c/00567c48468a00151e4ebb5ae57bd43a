@@ -1,0 +1,108 @@
+package uk.ac.ucl.cs.nterreri.GraphicsDemo;
+
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+
+public class Circle2D extends Ellipse2D {
+
+	//top-left coordinates of rectangle and diameter of circle (circle is
+	//inscribed in the rectangle)
+	protected int x, y, diameter;
+	protected boolean bouncedH, bouncedV;
+	protected Area area;
+	
+	private boolean intersects(int otherX, int otherY, int otherDiameter) {
+		if(Math.pow((x - otherX), 2.0) + Math.pow((y - otherY), 2.0) <=
+				Math.pow((diameter + otherDiameter), 2.0))
+			return true;
+		else 
+			return false;
+	}
+	
+	
+	@Override
+	public Rectangle2D getBounds2D() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+
+	//useless
+	@Override
+	public double getX() {
+		return x;
+	}
+	
+	//useless
+	@Override
+	public double getY() {
+		return y;
+	}
+
+	//useless
+	@Override
+	public double getWidth() {
+		return diameter;
+	}
+	
+	//useless
+	@Override
+	public double getHeight() {
+		return diameter;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setFrame(double x, double y, double w, double h){
+		try {
+			setFrame((int) x, (int) y, (int) w, (int) h );
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void setFrame(int x, int y, int w, int h) throws Exception {
+	
+		if(w == y)
+			this.diameter = w;
+		else
+			{
+				Exception e = new Exception("Cirlce2D instance setFrame \n" +
+						"call must set equal width and height parameter\n" +
+						"(the rectangle inscribing the circle must be a " +
+						"square).");
+				throw (e);
+			}
+		
+		if(!(checkPositive(x) && checkPositive(y) && checkPositive(w)))
+		{
+			Exception e = new Exception("Cricle2D instance setFrame call must" +
+					"set positive (or 0) for all parameters.");
+			throw e;
+		}
+		
+		this.x = x;
+		this.y = y;
+	}
+	
+	public void setFrame(int x, int y, int d) {
+		this.x = x;
+		this.y = y;
+		this.diameter = d;
+	}
+	
+	private boolean checkPositive(int x) {
+		if(x < 0)
+			return false;
+		return true;
+	}
+
+}

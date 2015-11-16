@@ -1,0 +1,58 @@
+package currency;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+
+public class CurrencyFrame extends JFrame {
+
+	/**
+	 * adding serialVersionUID avoids a warning (?)
+	 */
+	private static final long serialVersionUID = 122380596439679935L;
+	private JPanel contentPane;
+	private JComboBox<String> currencyFrom;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					CurrencyFrame frame = new CurrencyFrame();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public CurrencyFrame() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblCurrencyConverter = new JLabel("Currency Converter");
+		lblCurrencyConverter.setBounds(5, 5, 438, 15);
+		contentPane.add(lblCurrencyConverter);
+		
+		currencyFrom = new JComboBox<String>();
+		currencyFrom.setModel(new DefaultComboBoxModel<String>(new String[] {"GBP", "USD", "YEN", "EUR"}));
+		currencyFrom.setBounds(5, 82, 149, 24);
+		contentPane.add(currencyFrom);
+	}
+}

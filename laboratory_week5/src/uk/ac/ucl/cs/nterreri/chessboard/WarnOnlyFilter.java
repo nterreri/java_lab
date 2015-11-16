@@ -1,0 +1,16 @@
+package uk.ac.ucl.cs.nterreri.chessboard;
+
+import java.util.logging.Filter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
+public class WarnOnlyFilter implements Filter {
+
+	public boolean isLoggable(LogRecord record) {
+		if(record.getLevel() == Level.WARNING)
+			return true;
+		else 
+			return false;
+	}
+
+}

@@ -1,0 +1,47 @@
+package currency;
+
+public class Currency {
+	public Currency(){
+		name = "USD";
+		rate = 1.0;
+	}
+	public Currency(String name) throws InvalidCurrencyException{
+		this.name = name;
+		
+		switch(name.charAt(0))
+		{
+		case 'U':
+		case 'u':
+			rate = 1.0;
+			break;
+		case 'G':
+		case 'g':
+			rate = 2.4;
+			break;
+		case 'Y':
+		case 'y':
+			rate = 3.5;
+			break;
+		case 'E':
+		case 'e':
+			rate = 1.9;
+			break;
+			default:
+				InvalidCurrencyException e = new InvalidCurrencyException("Currency constructor called with invalid string parameter.");
+				throw(e);
+		}
+	}
+	public Currency(String name, double rate){
+		this.name = name;
+		this.rate = rate;
+	}
+	
+	public double compute_conversion_factor(Currency toCurrency){
+		return this.rate/toCurrency.rate;
+	}
+	
+	
+	public String name;
+	public double rate;
+}
+

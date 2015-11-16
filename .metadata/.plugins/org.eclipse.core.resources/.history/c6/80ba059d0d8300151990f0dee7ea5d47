@@ -1,0 +1,68 @@
+package uk.ac.ucl.cs.nterreri.frames;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import java.awt.GridLayout;
+import javax.swing.JComboBox;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import javax.swing.DefaultComboBoxModel;
+
+public class ComboBox extends JFrame {
+
+	private JPanel contentPane;
+	private JComboBox comboBox;
+	//Not declaring a JOptionPane instance because the method to be invoked is static:
+	//private JOptionPane confirmation;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					ComboBox frame = new ComboBox();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public ComboBox() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		GridBagLayout gbl_contentPane = new GridBagLayout();
+		gbl_contentPane.columnWidths = new int[]{0, 0, 0, 0, 0, 138, 0};
+		gbl_contentPane.rowHeights = new int[]{0, 0, 0, 67, 0};
+		gbl_contentPane.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		contentPane.setLayout(gbl_contentPane);
+		
+		comboBox = new JComboBox();
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"option1", "option2", "option3", "option4", "option5"}));
+		comboBox.setToolTipText(" - options -");
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.gridx = 5;
+		gbc_comboBox.gridy = 3;
+		contentPane.add(comboBox, gbc_comboBox);
+		
+		//confirmation = new JOptionPane(comboBox);
+		JOptionPane.showMessageDialog(comboBox, "Selected ...", "You Selected ...!", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+}

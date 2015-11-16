@@ -1,0 +1,15 @@
+package currency;
+
+public class NullCurrencyException extends Exception{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	NullCurrencyException(String s){
+		super(s);
+	}
+
+	
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-11-10T12:25:44</date>
+  <millis>1447158344014</millis>
+  <sequence>82</sequence>
+  <logger>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</logger>
+  <level>SEVERE</level>
+  <class>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</class>
+  <method>move</method>
+  <thread>1</thread>
+  <message>Illegal move: patter invalid or path is not free.
+</message>
+</record>
+<record>
+  <date>2015-11-10T12:25:52</date>
+  <millis>1447158352056</millis>
+  <sequence>249</sequence>
+  <logger>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</logger>
+  <level>SEVERE</level>
+  <class>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</class>
+  <method>move</method>
+  <thread>1</thread>
+  <message>Piece selected is white on a black turn.
+</message>
+</record>
+<record>
+  <date>2015-11-10T12:25:52</date>
+  <millis>1447158352057</millis>
+  <sequence>250</sequence>
+  <logger>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</logger>
+  <level>SEVERE</level>
+  <class>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</class>
+  <method>move</method>
+  <thread>1</thread>
+  <message>Please, select a black piece.
+</message>
+</record>
+<record>
+  <date>2015-11-10T12:25:59</date>
+  <millis>1447158359141</millis>
+  <sequence>417</sequence>
+  <logger>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</logger>
+  <level>SEVERE</level>
+  <class>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</class>
+  <method>move</method>
+  <thread>1</thread>
+  <message>Illegal move: patter invalid or path is not free.
+</message>
+</record>
+<record>
+  <date>2015-11-10T12:26:07</date>
+  <millis>1447158367504</millis>
+  <sequence>501</sequence>
+  <logger>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</logger>
+  <level>SEVERE</level>
+  <class>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</class>
+  <method>find_ycoord</method>
+  <thread>1</thread>
+  <message>Invalid chessboard position:
+</message>
+</record>
+<record>
+  <date>2015-11-10T12:26:07</date>
+  <millis>1447158367505</millis>
+  <sequence>502</sequence>
+  <logger>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</logger>
+  <level>SEVERE</level>
+  <class>uk.ac.ucl.cs.nterreri.chessboard.Chessboard</class>
+  <method>move</method>
+  <thread>1</thread>
+  <message>Invalid final position.
+</message>
+</record>
+</log>

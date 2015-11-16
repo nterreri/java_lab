@@ -1,0 +1,57 @@
+package uk.ac.ucl.cs.nterreri.GraphicsDemo;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+
+class GraphicsWindow extends JFrame {
+
+	private DrawingPane contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GraphicsWindow frame = new GraphicsWindow();
+					frame.setVisible(true);
+
+					frame.contentPane.initialState();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public GraphicsWindow() {
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			
+			@Override
+			public void windowClosed(WindowEvent e) {
+				getContentPane().setEnabled(false);
+				getParent().dispose();
+			}
+			
+		});
+		setBounds(100, 100, 900, 600);
+		contentPane = new DrawingPane();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+	}
+
+}

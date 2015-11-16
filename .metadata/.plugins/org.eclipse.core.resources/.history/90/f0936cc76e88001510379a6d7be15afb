@@ -1,0 +1,12 @@
+package uk.ac.ucl.cs.nterreri.XMLProccessing;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.XMLReaderAdapter;
+
+public class XMLParser extends XMLReaderAdapter {
+
+	public XMLParser() throws SAXException {
+		super();
+	}
+	
+}

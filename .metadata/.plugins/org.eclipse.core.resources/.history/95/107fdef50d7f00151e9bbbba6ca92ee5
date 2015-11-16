@@ -1,0 +1,67 @@
+package currency;
+
+public class Currency {
+	public Currency(){
+		this.setName("USD");
+	}
+	public Currency(String name){
+		switch(name.charAt(0))
+		{
+		case 'U':
+		case 'u':
+			rate = 1.0;
+			break;
+		case 'G':
+		case 'g':
+			rate = 2.4;
+			break;
+		case 'Y':
+		case 'y':
+			rate = 3.5;
+			break;
+		case 'E':
+		case 'e':
+			rate = 1.9;
+			break;
+			default:
+				System.err.println("Currency constructor called with invalid string parameter");
+		}
+	}
+	public Currency(String name, double rate){
+		this.name = name;
+		this.rate = rate;
+	}
+	
+	public double compute_conversion_factor(Currency toCurrency){
+		return this.rate/toCurrency.rate;
+	}
+	public void setName(String name){
+		
+		this.name = name;
+		
+		switch(name.charAt(0))
+		{
+		case 'U':
+		case 'u':
+			rate = 1.0;
+			break;
+		case 'G':
+		case 'g':
+			rate = 2.4;
+			break;
+		case 'Y':
+		case 'y':
+			rate = 3.5;
+			break;
+		case 'E':
+		case 'e':
+			rate = 1.9;
+			break;
+			default:
+				System.err.println("Currency modifier called with invalid string parameter");
+		}
+	}
+	
+	public String name;
+	public double rate;
+}

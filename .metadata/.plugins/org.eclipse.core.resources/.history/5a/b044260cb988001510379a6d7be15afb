@@ -1,0 +1,322 @@
+package uk.ac.ucl.cs.nterreri.XMLProccessing;
+
+import java.awt.Color;
+import java.awt.EventQueue;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+
+import uk.ac.ucl.cs.nterreri.chessboard.ChessConsoleHandler;
+import uk.ac.ucl.cs.nterreri.chessboard.FormatterRawMessage;
+
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+public class XMLPWindow implements ActionListener {
+
+	private JFrame frame;
+	//MenuBar and options:
+	private JMenuBar menuBar;
+	private JMenu mnFile;
+	private JMenuItem mntmOpen;
+	private JMenuItem mntmSave;
+	private JMenuItem mntmExit;
+	private JMenu mnNewMenu;
+	private JMenuItem mntmVerify;
+	//JSplitPane with two text areas:
+	private JSplitPane splitPane;
+	private JTextArea textArea_l;
+	private JTextArea textArea_r;
+	//filechooser declaration:
+	private JFileChooser fc;
+	private JScrollPane scrollPane_l;
+	private JScrollPane scrollPane_r;
+	//XMLreader:
+	private XMLReader xmlReader;
+	//String field holding textArea_l content:
+	//to be fed to parser to validate/save to file
+	//to be updated by filechooser and textArea_l getter
+	private String loadedText;
+	//Logger:
+	private final Logger LOGGER = Logger.getLogger(XMLPWindow.class.getName());
+	private RawMessageConsoleHandler handler;
+
+	//DELETE:
+	//OracleSAXParsingExample obj1 = new OracleSAXParsingExample();
+	//XMLParsingErrorHandler obj2 = new XMLParsingErrorHandler();
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					XMLPWindow window = new XMLPWindow();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public XMLPWindow() throws Exception {
+
+		//initialize filechooser:
+		fc = new JFileChooser();
+		fc.setFileFilter(new FileNameExtensionFilter("XML files", "xml"));
+
+		//initialize xmlreader:
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		spf.setNamespaceAware(true);
+		spf.setValidating(false);
+		SAXParser saxParser = spf.newSAXParser();
+		xmlReader = saxParser.getXMLReader();
+		//DELETE
+		//xmlReader.setContentHandler(obj1);
+		//xmlReader.setErrorHandler(obj2);
+		xmlReader.setContentHandler(new XMLParser());
+		xmlReader.setErrorHandler(new XMLParsingErrorHandler());
+
+		//set String field as empty string:
+		loadedText = "";
+
+		//initialize handler:
+		try {
+			handler = new RawMessageConsoleHandler();
+			handler.setLevel(Level.INFO);
+
+			LOGGER.setUseParentHandlers(false);
+			LOGGER.addHandler(handler);
+
+		} catch (SecurityException e) {
+			System.err.println("Fatal: Insufficient permissions to log output to console.");
+			e.printStackTrace();
+			System.exit(1);
+
+		}
+
+		//Mostly designer-generated:
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+
+		frame = new JFrame();
+		frame.setBounds(100, 100, 800, 500);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+		menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+
+		mnFile = new JMenu("File");
+		menuBar.add(mnFile);
+
+		mntmOpen = new JMenuItem("Open");
+		//XMLPWindow implements ActionListener, so can do as an action listener:
+		mntmOpen.addActionListener(this);
+		mnFile.add(mntmOpen);
+
+		mntmSave = new JMenuItem("Save");
+		mntmSave.addActionListener(this);
+		mnFile.add(mntmSave);
+
+		mntmExit = new JMenuItem("Exit");
+		mnFile.add(mntmExit);
+
+		mnNewMenu = new JMenu("Validate");
+		menuBar.add(mnNewMenu);
+
+		mntmVerify = new JMenuItem("Verify");
+		mntmVerify.addActionListener(this);
+		mnNewMenu.add(mntmVerify);
+		frame.getContentPane().setLayout(null);
+
+		//First add splitPane ...
+		splitPane = new JSplitPane();
+		splitPane.setEnabled(false);
+		splitPane.setBounds(0, 0, 780, 480);
+		frame.getContentPane().add(splitPane);
+
+		//... then, initialize text areas ...
+		textArea_l = new JTextArea();
+		//when a key is typed, 
+		//the content of textarea is fetched and placed into String field:
+		textArea_l.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				loadedText = textArea_l.getText();
+			}
+		});
+
+		//splitPane.setLeftComponent(textArea_l);
+
+		textArea_r = new JTextArea();
+		textArea_r.setEnabled(false);
+		textArea_r.setEditable(false);
+		textArea_r.setLineWrap(true);
+		textArea_r.setWrapStyleWord(true);
+		textArea_r.setForeground(Color.RED);
+		//splitPane.setRightComponent(textArea_r);
+
+		//... finally, initialize scrollpanes, 
+		//add textareas and then add scrollpanes to splitpane:
+		scrollPane_l = new JScrollPane(textArea_l);
+		splitPane.setLeftComponent(scrollPane_l);
+
+		scrollPane_r = new JScrollPane(textArea_r);
+		splitPane.setRightComponent(scrollPane_r);
+
+		splitPane.setDividerLocation(1.0);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		//load file if event is triggered by file opener button
+		if(e.getSource() == mntmOpen)
+		{
+			int returnVal = fc.showOpenDialog(frame);
+
+			if(returnVal == JFileChooser.APPROVE_OPTION)
+			{
+				File file = fc.getSelectedFile();
+				FileReader fr;
+				loadedText = "";
+
+				try { 
+
+					fr = new FileReader(file);
+					while(fr.ready())
+						loadedText += (char)fr.read();
+					fr.close();
+
+				} catch (IOException excpt) {
+					excpt.printStackTrace();
+
+				} 
+
+				//update textarea content:
+				textArea_l.setText(loadedText);
+
+			}
+		} else if (e.getSource() == mntmVerify) {
+			//feed string to SAX parser:
+			try {
+				verify();
+
+				//no exception thrown:
+				LOGGER.log(Level.INFO, "Valid XML structure\r\n");
+				JOptionPane.showMessageDialog(frame,  
+						"Valid XML structure", "Validation", 
+						JOptionPane.INFORMATION_MESSAGE);
+
+			} catch(SAXException sexcpt) {
+				////System.out.println("Parsing failed, SAXException caught");
+				//failed parsing, send error message defined by XMLParsingError
+				//to console via logger/to txtArea_r
+				//logging goes here
+				splitPane.setDividerLocation(0.75);
+				textArea_r.setEnabled(true);
+				textArea_r.setText(sexcpt.getMessage());
+
+				//exception thrown:
+				LOGGER.log(Level.WARNING, "Invalid XML structure:\n" + 
+						sexcpt.getMessage() + "\r\n");
+				JOptionPane.showMessageDialog(frame,  
+						"Invalid XML structure.\n" + 
+								"Check right side text for details.", 
+								"Validation", JOptionPane.ERROR_MESSAGE);
+
+
+			} catch(IOException ioexcpt) {
+				ioexcpt.printStackTrace();
+			}
+
+		} else if(e.getSource() == mntmSave) {
+
+			try {
+				verify();
+
+				//open fc to save:
+				int returnVal = fc.showSaveDialog(frame);
+
+				if(returnVal == JFileChooser.APPROVE_OPTION)
+				{
+					File file = fc.getSelectedFile();
+					FileWriter fw;
+					loadedText = "";
+
+					try { 
+
+						fw = new FileWriter(file);
+						while(fr.ready())
+							loadedText += (char)fr.read();
+						fr.close();
+
+					} catch (IOException excpt) {
+						excpt.printStackTrace();
+
+					} 
+				//no exception thrown:
+				LOGGER.log(Level.INFO, "File saved.\r\n");
+				JOptionPane.showMessageDialog(frame,  
+						"File saved.", "Saved", 
+						JOptionPane.PLAIN_MESSAGE);
+			} catch(SAXException sexcpt) {
+				////System.out.println("Parsing failed, SAXException caught");
+				//failed parsing, send error message defined by XMLParsingError
+				//to console via logger/to txtArea_r
+				//logging goes here
+				splitPane.setDividerLocation(0.75);
+				textArea_r.setEnabled(true);
+				textArea_r.setText(sexcpt.getMessage());
+
+				//exception thrown:
+				LOGGER.log(Level.SEVERE, "Invalid XML structure:\n" + 
+						sexcpt.getMessage() + "\n" +
+						"Structure must be acceptable before the file can" +
+						"be saved\r\n");
+				JOptionPane.showMessageDialog(frame,  
+						"Invalid XML structure.\n" + 
+								"Check right side text for details.\n" +
+								"Structure must be acceptable\n" +
+								"before the file can be saved.\r\n", 
+								"Validation", JOptionPane.ERROR_MESSAGE);
+
+			} catch(IOException ioexcpt) {
+				ioexcpt.printStackTrace();
+			}
+		}
+
+
+	}
+
+	private void verify() throws SAXException, IOException {
+		////System.out.println("Attempting to verify");
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(loadedText));
+		xmlReader.parse(is);
+	}
+}

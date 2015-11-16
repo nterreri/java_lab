@@ -1,0 +1,106 @@
+package uk.ac.ucl.cs.nterreri.mouse;
+
+import java.awt.EventQueue;
+
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JRadioButton;
+import javax.swing.WindowConstants;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+
+/**
+ * MouseListening is a frame with some JComponents, all of which can be
+ * dragged around the frame with the mouse.
+ * 
+ * @author nterreri
+ *
+ */
+public class MouseListening extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3970394452341145223L;
+	private JPanel contentPane;
+	private MouseListener ml;
+	private JLabel lblALabel;
+	private JButton btnAButton;
+	private JRadioButton rdbtnARadioButton;
+	private JComboBox<String> comboBox;
+	private JLabel lblAnImage;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					MouseListening frame = new MouseListening();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public MouseListening() {
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setBounds(100, 100, 647, 411);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		//The same MouseListener listener (defined in MouseListener.java)
+		//is registered to each component, allowing it to be dragged.
+		ml = new MouseListener();
+		
+		lblALabel = new JLabel("A label");
+		lblALabel.setBounds(50, 31, 70, 15);
+		lblALabel.addMouseMotionListener(ml);
+		contentPane.add(lblALabel);
+		
+		btnAButton = new JButton("a button");
+		btnAButton.setBounds(469, 51, 117, 25);
+		btnAButton.addMouseMotionListener(ml);
+		contentPane.add(btnAButton);
+		
+		rdbtnARadioButton = new JRadioButton("a radio button");
+		rdbtnARadioButton.setBounds(47, 321, 149, 23);
+		rdbtnARadioButton.addMouseMotionListener(ml);
+		contentPane.add(rdbtnARadioButton);
+		
+		comboBox = new JComboBox<String>();
+		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"a combo box"}));
+		comboBox.setBounds(472, 268, 127, 24);
+		comboBox.addMouseMotionListener(ml);
+		contentPane.add(comboBox);
+		
+		lblAnImage = new JLabel("An image");
+		lblAnImage.setIcon(new ImageIcon
+				(MouseListening.class.getResource("/uk/ac/ucl/cs/nterreri/mouse/generic_scaled.jpg")));
+		lblAnImage.setBounds(50, 183, 99, 92);
+		lblAnImage.addMouseMotionListener(ml);
+		contentPane.add(lblAnImage);
+		
+		
+	}
+
+	static void update_coords(JComponent componentFiring, int x, int y) {
+		componentFiring.setBounds(componentFiring.getX() + x, componentFiring.getY() + y, 
+				componentFiring.getWidth(), componentFiring.getHeight());
+		
+	}
+}

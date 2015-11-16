@@ -1,0 +1,47 @@
+package uk.ac.ucl.cs.nterreri.XMLProccessing;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.*;
+
+public class XMLParser extends DefaultHandler {
+
+	@SuppressWarnings("rawtypes")
+	private Hashtable tags;
+	
+	@SuppressWarnings("rawtypes")
+	public void startDocument() throws SAXException {
+		tags = new Hashtable();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void startElement(String namespaceURI,
+							String localName,
+							String qName,
+							Attributes atts)
+		throws SAXException {
+		
+		String key = localName;
+		Object value = tags.get(key);
+		
+		if(value == null) {
+			tags.put(key,  new Integer(1));
+		}
+		else {
+			int count = ((Integer)value).intValue();
+			count++;
+			tags.put(key,  new Integer(count));
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void endDocument() throws SAXException {
+		//?
+		}
+	}
+	
+	
+}

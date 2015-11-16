@@ -1,0 +1,1152 @@
+package uk.ac.ucl.cs.nterreri.chessboard;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.logging.*;
+/**
+ * Simple chess-game simulation program.
+ * <p>
+ * The program writes a representation of the chess game to the console
+ * and reads user input from console. Only simple chess moves are allowed
+ * (that means, no castling and pawns do not become queens).
+ * <p>
+ * 
+ * <strike>TODO: add turns and endgame conditions after which the board is displayed
+ * one more time before the program terminates.
+ * </strike>
+ * <p>
+ * @author salpo
+ * @version 04/11/15 - 3
+ *
+ */
+public class Chessboard {
+	final static int ROWS = 8;
+	final static int COLUMNS = 8;
+	static int turn;
+	static final Logger LOGGER = Logger.getLogger(Chessboard.class.getName());
+	static Handler fineLog = null;
+	static ChessConsoleHandler infoLog = null;
+	static Handler warnLog = null;
+	static Handler severeLog = null;
+	
+	/**
+	 * Sets up handler fields. 
+	 * <p>
+	 * Attempts to write a FINE .log file.
+	 * <p>
+	 * Sets up console output channel.
+	 */
+	static void initialize_handlers() {
+		
+		//console output:
+		try {
+			infoLog = new ChessConsoleHandler();
+			
+			infoLog.setLevel(Level.INFO);
+			infoLog.setFormatter(new FormatterRawMessage());
+			LOGGER.addHandler(infoLog);
+			
+		} catch (SecurityException e) {
+			System.err.println("Fatal: Insufficient permissions to log output to console.");
+			e.printStackTrace();
+			System.exit(1);
+			
+		}
+		
+		
+		//Attempt to add detailed file logs
+		//if any of this fails, console output is unaffected:
+		try {
+			fineLog = new FileHandler("detailed_game.log");
+			fineLog.setLevel(Level.FINE);
+			fineLog.setFormatter(new FormatterRawMessage());
+			LOGGER.addHandler(fineLog);
+			
+		} catch (IOException e) {
+			System.err.println("Unable to write to log file, only console" +
+								" output will appear.");
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			System.err.println("Insufficient permissions to write log file" +
+								", only console output will appear.");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Chessmen enum
+	 * <p>
+	 * Enumeration listing different possible states of a Chessman instance.
+	 * <p>
+	 * @author salpo
+	 *
+	 */
+	public enum Chessmen{
+		WHITE_KING,
+		WHITE_QUEEN,
+		WHITE_ROOK,
+		WHITE_BISHOP,
+		WHITE_KNIGHT,
+		WHITE_PAWN,
+		
+		BLACK_KING,
+		BLACK_QUEEN,
+		BLACK_ROOK,
+		BLACK_BISHOP,
+		BLACK_KNIGHT,
+		BLACK_PAWN,
+		EMPTY
+	}
+	
+	/***
+	* Prints chessboard to the console
+	* <p>
+	* y for rows, x for columns, standing for different positions on 
+	* different axes:
+	*<p>
+	* +------------> x axis <p>	* |<p>
+	* |<p>
+	* |<p>
+	* |<p>
+	* v<p>
+	* y axis
+	* <p>
+	* @param chessboard a two-dimensional array representing the chessboard
+	*/
+	public static void printBoard (Chessmen [][]chessboard){
+		// print a b c d ...
+		LOGGER.log(Level.INFO, " \ta\tb\tc\td\te\tf\tg\th\n\n");
+
+		/* y for rows, x for columns, standing for different positions on 
+		 * different axes:
+		 *
+		 * @------------> x axis
+		 * |
+		 * |
+		 * |
+		 * |
+		 * v
+		 * y axis
+		 */
+		for (int y = 0; y < ROWS; y++) 
+		{
+			
+			LOGGER.log(Level.INFO, (ROWS - y) + ".\t");
+			for (int x = 0; x < COLUMNS; x++) 
+			{
+				switch (chessboard[x][y]) 
+				{
+				case WHITE_KING:
+					LOGGER.log(Level.INFO, "WK\t");
+					break;
+				case WHITE_QUEEN:
+					LOGGER.log(Level.INFO, "wQ\t");
+					break;
+				case WHITE_ROOK:
+					LOGGER.log(Level.INFO, "wR\t");
+					break;
+				case WHITE_BISHOP:
+					LOGGER.log(Level.INFO, "wB\t");
+					break;
+				case WHITE_KNIGHT:
+					LOGGER.log(Level.INFO, "wK\t");
+					break;
+				case WHITE_PAWN:
+					LOGGER.log(Level.INFO, "wP\t");
+					break;
+				case BLACK_KING:
+					LOGGER.log(Level.INFO, "BK\t");
+					break;
+				case BLACK_QUEEN:
+					LOGGER.log(Level.INFO, "bQ\t");
+					break;
+				case BLACK_ROOK:
+					LOGGER.log(Level.INFO, "bR\t");
+					break;
+				case BLACK_BISHOP:
+					LOGGER.log(Level.INFO, "bB\t");
+					break;
+				case BLACK_KNIGHT:
+					LOGGER.log(Level.INFO, "bK\t");
+					break;
+				case BLACK_PAWN:
+					LOGGER.log(Level.INFO, "bP\t");
+					break;
+				case EMPTY:
+					LOGGER.log(Level.INFO, "  \t");
+				}
+			}
+			LOGGER.log(Level.INFO, "\n\n");
+		}
+	}
+	
+	/***
+	 * Initializes chessboard with <code>ROWS</code>-many rows and 
+	 * <code>COLUMNS</code>-many columns, placing black pieces at the top of 
+	 * the board and white pieces at the bottom.
+	 * <p>
+	 * 
+	 * @param chessboard a two-dimensional array representing the chessboard
+	 */
+	public static void initialize_chessboard(Chessmen [][] chessboard)
+	{
+				for(int y = 0; y < ROWS; y++)
+				{
+					for(int x = 0; x < COLUMNS; x++)
+					{
+						if(y == 0)
+							switch(x)
+							{
+							case 0:
+								chessboard[x][y] = Chessmen.BLACK_ROOK;
+								break;
+							case 1:
+								chessboard[x][y] = Chessmen.BLACK_KNIGHT;
+								break;
+							case 2:
+								chessboard[x][y] = Chessmen.BLACK_BISHOP;
+								break;
+							case 3:
+								chessboard[x][y] = Chessmen.BLACK_KING;
+								break;
+							case 4:
+								chessboard[x][y] = Chessmen.BLACK_QUEEN;
+								break;
+							case 5:
+								chessboard[x][y] = Chessmen.BLACK_BISHOP;
+								break;
+							case 6:
+								chessboard[x][y] = Chessmen.BLACK_KNIGHT;
+								break;
+							case 7:
+								chessboard[x][y] = Chessmen.BLACK_ROOK;
+								break;
+							}
+						else if (y == 1)
+							chessboard[x][y] = Chessmen.BLACK_PAWN;
+						else if (y == 6)
+							chessboard[x][y] = Chessmen.WHITE_PAWN;
+						else if (y == 7)
+							switch(x)
+							{
+							case 0:
+								chessboard[x][y] = Chessmen.WHITE_ROOK;
+								break;
+							case 1:
+								chessboard[x][y] = Chessmen.WHITE_KNIGHT;
+								break;
+							case 2:
+								chessboard[x][y] = Chessmen.WHITE_BISHOP;
+								break;
+							case 3:
+								chessboard[x][y] = Chessmen.WHITE_KING;
+								break;
+							case 4:
+								chessboard[x][y] = Chessmen.WHITE_QUEEN;
+								break;
+							case 5:
+								chessboard[x][y] = Chessmen.WHITE_BISHOP;
+								break;
+							case 6:
+								chessboard[x][y] = Chessmen.WHITE_KNIGHT;
+								break;
+							case 7:
+								chessboard[x][y] = Chessmen.WHITE_ROOK;
+								break;
+							}
+						else
+							chessboard[x][y] = Chessmen.EMPTY;
+							
+					}
+				}
+	}
+	
+	/** 
+	 * Parses parameter <code>move</code> and executes the command, changing
+	 * <code>chessboard</code>.
+	 * <p>
+	 * First checks if <code>move</code> can be parsed to indicating two
+	 * valid positions on the board, then calls <code>isMoveLegal<code>.
+	 * If this returns true, then the piece at the first position is moved
+	 * to the second, overwriting the <code>Chessmen</code> in that position.
+	 * <p>
+	 * Also checks if the player is attempting to move a white piece on a
+	 * black turn (and viceversa).
+	 * <p>
+	 * Finally, if the move is legitimate, it executes it, then increases the 
+	 * turn counter.
+	 * <p>
+	 * @param chessboard	a two-dimensional array representing the chessboard
+	 * @param move			a string expressing a move, formatted as, e.g., 
+	 * a1 to a5 or a1 to c3
+	 */
+	public static void move(Chessmen[][] chessboard, String move)
+	{
+		int initial_x, initial_y, final_x, final_y;
+		
+		//parse move string into components:
+		String[] components = move.split(" ");
+		
+		initial_x = find_xcoord(components[0]);
+		initial_y = find_ycoord(components[0]);
+
+		final_x = find_xcoord(components[2]);
+		final_y = find_ycoord(components[2]);
+		
+		if(initial_x < 0 || initial_y < 0)
+		{
+			LOGGER.log(Level.SEVERE, "Invalid initial position.\n");
+		}
+		else if(final_x < 0 || final_y < 0)
+		{
+			LOGGER.log(Level.SEVERE, "Invalid final position.\n");
+		}
+		else if((initial_x == final_x) && (initial_y == final_y))
+		{
+			//do nothing, allows same place "move"
+		}
+		else if(chessboard[initial_x][initial_y] == Chessmen.EMPTY)
+		{
+			LOGGER.log(Level.SEVERE, "Selected initial position is empty.\n");
+		}
+		else if(isWhiteTurn())
+		{
+			if(!isWhite(chessboard[initial_x][initial_y]))
+			{
+				LOGGER.log(Level.SEVERE, "Piece selected is black on a white" +
+											"turn.\n");
+				LOGGER.log(Level.SEVERE,"Please, select a white piece.\n");
+			}
+			else
+			{
+				if(!isMoveLegal(chessboard, 
+						initial_x, initial_y, final_x, final_y))
+					LOGGER.log(Level.SEVERE, "Illegal move: patter invalid"
+							+ " or path is not free.\n");
+				else
+				{
+					chessboard[final_x][final_y] = 
+							chessboard[initial_x][initial_y];
+					chessboard[initial_x][initial_y] = Chessmen.EMPTY;
+					turn++;
+				}
+			}
+			
+		}
+		else //if(!isWhiteTurn())
+		{
+			if(isWhite(chessboard[initial_x][initial_y]))
+			{
+				LOGGER.log(Level.SEVERE,"Piece selected is white" +
+										"on a black turn.\n");
+				LOGGER.log(Level.SEVERE,"Please, select a black piece.\n");
+			}
+			else
+			{
+				if(!isMoveLegal(chessboard, 
+						initial_x, initial_y, final_x, final_y))
+					LOGGER.log(Level.SEVERE,"Illegal move: patter invalid"
+							+ " or path is not free.\n");
+				else
+				{
+					chessboard[final_x][final_y] = 
+							chessboard[initial_x][initial_y];
+					chessboard[initial_x][initial_y] = Chessmen.EMPTY;
+					turn++;
+				}
+			}
+		}
+		
+		
+	}
+	
+	
+/**	
+ * Returns true if the move specified in terms of initial coordinates
+	 * (<code>ix</code>, <code>iy</code>) and final coordinates 
+	 * (<code>ix</code>, <code>iy</code>) is legal, given the piece occupying
+	 * the first set of coordinates. False otherwise.
+	 * <p>
+	 * For most types of pieces, calls either <code>isWhite</code> or
+	 * <code>isBlack</code> to check if the final position is already occupied
+	 * by a piece of the same colour as the one to be moved, then calls
+	 * <code>isPatternLegal</code> and <code>isPathFree</code> to decide
+	 * whether the move is legal.
+	 * <p>
+	 * The only pieces that receive special treatment are the pawns because
+	 * of the complexity of the rules governing their movement. Their rules are
+	 * handled within the present method, and not delegated to isPatternLegal 
+	 * and isPathFree.
+	 * <p>
+	 * 
+	 * @param chessboard
+	 * @param ix
+	 * @param iy
+	 * @param fx
+	 * @param fy
+	 * @return true if move is legal, false otherwise
+	 */
+	public static boolean isMoveLegal(Chessmen[][] chessboard, 
+			int ix, int iy, int fx, int fy)
+	{
+		switch(chessboard[ix][iy])
+		{
+		//Kings:
+		case BLACK_KING:
+			if(isBlack(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+
+		case WHITE_KING:
+			if(isWhite(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+		//Queens:
+		case BLACK_QUEEN:
+			if(isBlack(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+		
+		case WHITE_QUEEN:
+			if(isWhite(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+			//Rooks:
+		case BLACK_ROOK:
+			if(isBlack(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+		case WHITE_ROOK:
+			if(isWhite(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+			//Bishops:
+		case BLACK_BISHOP:
+			if(isBlack(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+		case WHITE_BISHOP:
+			if(isWhite(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy) &&
+					pathIsFree(chessboard, ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+			//Knight:
+		case BLACK_KNIGHT:
+			if(isBlack(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+		case WHITE_KNIGHT:
+			if(isWhite(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+			
+			//Pawns:
+		case BLACK_PAWN:
+			if(isBlack(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy))
+			{
+				if((iy == 1) && 
+					(fx == ix) && 
+					(fy == iy + 2))
+				{
+					if(pathIsFree(chessboard, ix, iy, fx, fy))
+						return true;
+					else
+						return false;
+				}
+				else if((fx == ix) &&
+						(isWhite(chessboard[fx][fy])))
+				{
+					LOGGER.log(Level.SEVERE,"Black pawn cannot move forward on"
+							+ " top of white piece\n");
+					return false;
+				}
+				else
+					return true;
+			}
+			else if((fy == (iy + 1)) && 
+					(fx == (ix + 1) || (fx == (ix - 1))))
+			{
+				if(isWhite(chessboard[fx][fy]))
+					return true;
+				else
+					return false;
+			}
+			else
+				return false;
+
+		case WHITE_PAWN:
+			if(isWhite(chessboard[fx][fy]))
+				return false;
+			if(patternIsLegal(chessboard[ix][iy], ix, iy, fx, fy))
+			{
+				if((iy == 6) && 
+					(fx == ix) && 
+					(fy == iy - 2))
+				{
+					if(pathIsFree(chessboard, ix, iy, fx, fy))
+						return true;
+					else
+						return false;
+				}
+				else if((fx == ix) &&
+						(isBlack(chessboard[fx][fy])))
+				{
+					LOGGER.log(Level.SEVERE,"White pawn cannot move forward on"
+							+ " top of black piece\n");
+					return false;
+				}
+				else
+					return true;
+			}
+			else if((fy == (iy - 1)) && (fx == (ix + 1) || (fx == (ix - 1))))
+			{
+				if(isBlack(chessboard[fx][fy]))
+					return true;
+				else
+					return false;
+			}
+			else return false;
+
+		default:
+		case EMPTY:
+			//cannot move nothing
+			return false;
+		}
+	}
+	
+
+	/**
+	 *  
+	 * @param piece type of piece to be moved
+	 * @param ix
+	 * @param iy
+	 * @param fx
+	 * @param fy
+	 * @return true if pattern is legal for the piece to be moved, false 
+	 * otherwise.
+	 */
+	public static boolean patternIsLegal(Chessmen piece,
+			int ix, int iy, int fx, int fy)
+	{
+		switch(piece)
+		{
+		case BLACK_KING:
+		case WHITE_KING:
+			//King is moving horizontally by only one step:
+			if(((fy == iy)) && (fx == (ix + 1) || fx == (ix - 1)))
+				return true;
+			//Or, king is moving vertically by only one step:
+			else if ((fx == ix) && (fy == (iy + 1) || fy == (iy - 1)))
+				return true;
+			//Or, king is moving diagonally by only one step:
+			else if(fy == (iy + 1) && fx == (ix + 1) ||
+					fy == (iy + 1) && fx == (ix - 1) ||
+					fy == (iy - 1) && fx == (ix + 1) ||
+					fy == (iy - 1) && fx == (ix - 1))
+				return true;
+			else
+				return false;
+		case BLACK_QUEEN:
+		case WHITE_QUEEN:
+			//Queen is moving horizontally, or vertically:
+			if((fy == iy) || (fx == ix))
+				return true;
+			//Or if queen is moving diagonally:
+			if(isPatternDiagonal(ix, iy, fx, fy))
+				return true;
+			else return false;
+		case BLACK_ROOK:
+		case WHITE_ROOK:
+			//Rook is moving horizontally or vertically:
+			if((fy == iy) || (fx == ix))
+				return true;
+			else
+				return false;
+		case BLACK_BISHOP:
+		case WHITE_BISHOP:
+			//Bishop is moving diagonally:
+			if(isPatternDiagonal(ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+		case BLACK_KNIGHT:
+		case WHITE_KNIGHT:
+			//Knights move in L shapes:
+			if(isPatternLshaped(ix, iy, fx, fy))
+				return true;
+			else
+				return false;
+		case BLACK_PAWN:
+			/*black pawn can only move downwards by 1.
+			 * 
+			 *Unless there is a white piece on the next row down from the
+			 *black pawn, standing to either side of the diagonal path from it.
+			 *Even though in the present program, patternIsLegal()
+			 *return false in this last case. The move is nonetheless allowed
+			 *at the level of isMoveLegal()
+			 *
+			 *Also, the pawn can move by 2 downwards if it
+			 *has not been moved from its starting position.*/
+			if((fx == ix) && (fy == (iy + 1)))
+				return true;
+			else if((iy == 1) && 
+					(ix == fx) &&
+					(fy == (iy + 2)))
+				return true;
+			else
+				return false;
+		case WHITE_PAWN:
+			/*white pawn can only move upwards by 1.
+			 * 
+			 *Unless there is a black piece on the next row up from the
+			 *white pawn, standing to either side of the diagonal path from it.
+			 *Even though in the present program, patternIsLegal()
+			 *return false in this last case. The move is nonetheless allowed
+			 *at the level of isMoveLegal()
+			 *
+			 *Also, the pawn can move by 2 upwards if it
+			 *has not been moved from its starting position.*/
+			if((fx == ix) && (fy == (iy - 1)))
+				return true;
+			else if((iy == 6) && 
+					(ix == fx) &&
+					(fy == (iy - 2)))
+				return true;
+			else
+				return false;
+			
+		default:
+		case EMPTY:
+			/*this is never used because it is recognized by isMoveLegal()
+			 * that it is impossible to move nothing*/
+			return false;
+		}
+	}
+	
+	
+	/**
+	 *  
+	 * @param ix
+	 * @param iy
+	 * @param fx
+	 * @param fy
+	 * @return true if the pattern described is L-shaped, false otherwise.
+	 */
+	public static boolean isPatternLshaped(int ix, int iy, int fx, int fy)
+	{
+		if(iy < fy)
+		{
+			//the rectangle is either one way XOR the other:
+			if(ix < fx)
+				if(((fx == ix + 1) && (fy == iy + 2)) ^
+				((fx == ix + 2) && (fy == iy + 1)))
+					return true;
+			if(fx < ix)
+				if(((fx == ix - 2) && (fy == iy + 1)) ^
+						((fx == ix - 1) && (fy == iy + 2)))
+							return true;
+
+			return false;
+		}
+		else if(fy < iy)
+		{
+			//the rectangle is either one way XOR the other:
+			if(ix < fx)
+				if(((fx == ix + 1) && (fy == iy - 2)) ^
+				((fx == ix + 2) && (fy == iy - 1)))
+					return true;
+			if(fx < ix)
+				if(((fx == ix - 1) && (fy == iy - 2)) ^
+						((fx == ix - 2) && (fy == iy - 1)))
+							return true;
+
+			return false;
+		}
+		
+
+		return false;
+	}
+	
+	
+	/**
+	 * 
+	 * @param ix
+	 * @param iy
+	 * @param fx
+	 * @param fy
+	 * @return true if patter described is diagonal, false otherwise.
+	 */
+	public static boolean isPatternDiagonal(int ix, int iy, int fx, int fy)
+	{
+		if(fx < ix)
+		{
+			int x = ix;
+			int y = iy;
+			if(fy < iy)
+			{
+				while((fx < x) || (fy < y))
+				{
+					--x;
+					--y;
+				}
+				
+				if(x == fx && y == fy)
+					return true;
+				else return false;
+			}
+			else if(iy < fy)
+			{
+				while((fx < x) || (fy > y))
+				{
+					--x;
+					++y;
+				}
+				
+				if(x == fx && y == fy)
+					return true;
+				else return false;
+			}
+		}
+		else if(ix < fx)
+		{
+			int x = ix;
+			int y = iy;
+			if(fy < iy)
+			{
+				while((fx > x) || (fy < y))
+				{
+					++x;
+					--y;
+				}
+				
+				if(x == fx && y == fy)
+					return true;
+				else return false;
+			}
+			else if(iy < fy)
+			{
+				while((fx > x) || (fy > y))
+				{
+					++x;
+					++y;
+				}
+				
+				if(x == fx && y == fy)
+					return true;
+				else return false;
+			}
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * 
+	 * @param chessboard
+	 * @param ix
+	 * @param iy
+	 * @param fx
+	 * @param fy
+	 * @return true if the diagonal path described by the coordinates is free
+	 * of pieces between the initial and final position, false otherwise.
+	 * <p>
+	 * Called by <code>pathIsFree</code>
+	 */
+	public static boolean diagonalIsFree(Chessmen[][] chessboard, 
+			int ix, int iy, int fx, int fy)
+	{
+		if(fx < ix)
+		{
+			int x;
+			int y;
+			if(fy < iy)
+			{
+				x = ix - 1;
+				y = iy - 1;
+				while((fx < x) || (fy < y))
+				{
+					if(chessboard[x][y] != Chessmen.EMPTY)
+						return false;
+					--x;
+					--y;
+				}
+				
+				return true;
+			}
+			else if(iy < fy)
+			{
+				x = ix - 1;
+				y = iy + 1;
+				while((fx < x) || (fy > y))
+				{
+					if(chessboard[x][y] != Chessmen.EMPTY)
+						return false;
+					
+					--x;
+					++y;
+				}
+				
+				return true;
+			}
+		}
+		else if(ix < fx)
+		{
+			int x;
+			int y;
+			if(fy < iy)
+			{
+				x = ix + 1;
+				y = iy - 1;
+				while((fx > x) || (fy < y))
+				{
+					if(chessboard[x][y] != Chessmen.EMPTY)
+						return false;
+					
+					++x;
+					--y;
+				}
+				
+				return true;
+			}
+			else if(iy < fy)
+			{
+				x = ix + 1;
+				y = iy + 1;
+				while((fx > x) || (fy > y))
+				{
+					if(chessboard[x][y] != Chessmen.EMPTY)
+						return false;
+					
+					++x;
+					++y;
+				}
+				
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * First, identifies the pattern described (if this is any of the legal
+	 * patterns for chess). Then, decides whether the path described by the 
+	 * coordinates is free of interposing pieces.
+	 * <p>
+	 * 
+	 * @param chessboard
+	 * @param ix
+	 * @param iy
+	 * @param fx
+	 * @param fy
+	 * @return true if the path described by the coordinates is free of pieces
+	 * between the initial and final position, false otherwise.
+	 */
+	public static boolean pathIsFree(Chessmen [][]chessboard, 
+			int ix, int iy, int fx, int fy)
+	{
+		//if move is horizontal,
+		if(fy == iy)
+		{
+			//and nothing is in the way:
+			if(fx < ix){
+				for(int i = (fx + 1); i < ix; i++){
+					if(chessboard[i][iy] != Chessmen.EMPTY)
+						return false;
+				}
+				return true;
+			}
+			else if(ix < fx){
+				for(int i = (ix + 1); i < fx; i++){
+					if(chessboard[i][iy] != Chessmen.EMPTY)
+						return false;
+				}
+				return true;
+			}
+		}
+		//if move is vertical,
+		else if(fx == ix)
+		{
+			//and nothing is in the way:
+			if(fy < iy){
+				for(int i = (fy + 1); i < iy; i++){
+					if(chessboard[ix][i] != Chessmen.EMPTY)
+						return false;
+				}
+				return true;
+			}
+			else if(iy < fy){
+				for(int i = (iy + 1); i < fy; i++){
+					if(chessboard[ix][i] != Chessmen.EMPTY)
+						return false;
+				}
+				return true;
+			}
+		}
+		//if move is diagonal and free:
+		else if(isPatternDiagonal(ix, iy, fx, fy) && 
+				diagonalIsFree(chessboard, ix, iy, fx, fy))
+			return true;
+		//no need to check for Lshaped pattern;
+		//checks for the initial 2 steps pawn move are made at the level of
+		//isMoveLegal()
+		
+		return false;
+	}
+	
+	
+	/**
+	 * 
+	 * @param piece type of chess piece (member of <code>Chessmen</code>)
+	 * @return true if <code>piece</code> is any black piece. False otherwise.
+	 */
+	public static boolean isBlack(Chessmen piece)
+	{
+		switch(piece)
+		{
+		case BLACK_KING:
+		case BLACK_QUEEN:
+		case BLACK_ROOK:
+		case BLACK_BISHOP:
+		case BLACK_KNIGHT:
+		case BLACK_PAWN:
+			//System.out.println("Position occupied by a black piece.");//debug
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * 
+	 * @param piece type of chess piece (member of <code>Chessmen</code>)
+	 * @return true if <code>piece</code> is any white piece. False otherwise.
+	 */
+	public static boolean isWhite(Chessmen piece)
+	{
+		switch(piece)
+		{
+		case WHITE_KING:
+		case WHITE_QUEEN:
+		case WHITE_ROOK:
+		case WHITE_BISHOP:
+		case WHITE_KNIGHT:
+		case WHITE_PAWN:
+			//System.out.println("Position occupied by a white piece."); //debug
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * 
+	 * @param position_on_chessboard string describing a position on the
+	 * chessboard by a letter and number (example: e6)
+	 * @return Returns the number corrisponding to the array index of the
+	 * x coordinate of the position indicated, or -1 if no valid position
+	 * has been parsed from the parameter.
+	 * @see #move(Chessmen[][], String)
+	 * @see #find_ycoord(String)
+	 */
+	public static int find_xcoord(String position_on_chessboard)
+	{
+		switch(position_on_chessboard.charAt(0))
+		{
+		case 'a':
+			return 0;
+		case 'b':
+			return 1;
+		case 'c':
+			return 2;
+		case 'd':
+			return 3;
+		case 'e':
+			return 4;
+		case 'f':
+			return 5;
+		case 'g':
+			return 6;
+		case 'h':
+			return 7;
+		default:
+			LOGGER.log(Level.SEVERE,"Invalid chessboard position: \n");
+			return -1;
+		}
+	}
+	
+		
+	/**
+	 * 
+	 * @param position_on_chessboard string describing a position on the
+	 * chessboard by a letter and number (example: e6)
+	 * @return Returns the number corrisponding to the array index of the
+	 * y coordinate of the position indicated, or -1 if no valid position
+	 * has been parsed from the parameter.
+	 * @see #move(Chessmen[][], String)
+	 * @see #find_xcoord(String)
+	 */
+	public static int find_ycoord(String position_on_chessboard)
+	{
+		switch(position_on_chessboard.charAt(1))
+		{
+		case '8':
+			return 0;
+		case '7':
+			return 1;
+		case '6':
+			return 2;
+		case '5':
+			return 3;
+		case '4':
+			return 4;
+		case '3':
+			return 5;
+		case '2':
+			return 6;
+		case '1':
+			return 7;
+		default:
+			LOGGER.log(Level.SEVERE,"Invalid chessboard position:\n");
+			return -1;
+		}
+		
+	}
+	
+	
+	/**
+	 * 
+	 * @return true if <code>turn</code> is even (or 0), false otherwise
+	 */
+	public static boolean isWhiteTurn()
+	{
+		if(turn%2 == 0)
+			return true;
+		else return false;
+	}
+	
+/**
+ * Called at the end of each turn.
+ * 
+ * @param chessboard
+ * @return 0 if both the black and white kings are still somewhere on the board.
+ * <p>
+ * -1 if the white king is not on the board
+ * <p>
+ * -2 if the black king is not on the board
+ */
+	public static int endgame(Chessmen[][] chessboard)
+	{
+		boolean white_alive = false;
+		boolean black_alive = false;
+		for(int y = 0; y < ROWS; y++)
+		{
+			for(int x = 0; x < COLUMNS; x++)
+			{
+				if(chessboard[x][y] == Chessmen.WHITE_KING)
+					white_alive = true;
+				if(chessboard[x][y] == Chessmen.BLACK_KING)
+					black_alive = true;
+			}
+		}
+		
+		if(!white_alive)
+			{
+
+			LOGGER.log(Level.INFO,"Game over.\n");
+			LOGGER.log(Level.INFO,"Black side victory.\n");
+				return -1;
+			}
+		else if(!black_alive)
+		{
+			LOGGER.log(Level.INFO,"Game over.\n");
+			LOGGER.log(Level.INFO,"White side victory.\n");
+			return -2;
+		}
+		else return 0;
+	}
+	
+	//Entry point:
+	public static void main(String[] args) {
+		Chessmen[][] chessboard = new Chessmen[8][8];
+		Scanner is = new Scanner(System.in);
+		String command;
+
+		initialize_chessboard(chessboard);
+		initialize_handlers();
+		
+		/*Game loops util one of the players quits or an endgame 
+		 * condition is triggered.
+		 */
+		int game_over;
+		while(true)
+		{
+			printBoard(chessboard);
+			game_over = endgame(chessboard);
+			if(game_over < 0)
+				System.exit(0);
+		
+			LOGGER.log(Level.INFO,"Enter a command (e.g. \"e1 to e5\"): ");
+			command = is.nextLine();
+			
+			if(command.equalsIgnoreCase("exit"))
+				{
+					LOGGER.log(Level.INFO,"Terminating program\n");
+					is.close();
+					System.exit(0);
+				}
+			move(chessboard, command);
+			
+			LOGGER.log(Level.INFO,"Enter \"exit\" to quit the program.\n");
+		}
+	}
+
+}

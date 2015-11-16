@@ -1,0 +1,205 @@
+package uk.ac.ucl.cs.nterreri.GraphicsDemo;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Area;
+import java.util.Random;
+
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+class DrawingPane extends JPanel implements ActionListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3259442098173462291L;
+	protected Timer timer;
+	//blue ball data:
+	private Circle2D blue;
+	//green ball data:
+	private Circle2D green;
+	//red ball data:
+	private Circle2D red;
+
+	DrawingPane() {
+		super();
+		blue = new Circle2D();
+		green = new Circle2D();
+		red = new Circle2D();
+	}
+
+	/**
+	 * Sets up the initial state of the panel.
+	 * <p>
+	 * Had to be separated from constructor call because at that time the panel
+	 * has no extension. The panel has null extension until AFTER the FRAME is
+	 * set to visible.
+	 * <p>
+	 * Only after that point this method can be called.
+	 */
+	protected void init() {
+
+		Dimension paneSize = getSize();
+
+		//blue ball diameter is 10% of smallest between height and width:
+		blue.diameter = (Math.min(paneSize.width, paneSize.height))/10;
+		blue.x = (getWidth() - blue.diameter) - 1; 
+		blue.y = getHeight()/2; //this is constant throughout
+		blue.bouncedH = false; //blue ball moves leftwards initially
+
+		//green ball diameter is 15%-ish of smallest between height and width:
+		green.diameter = (Math.min(paneSize.width, paneSize.height))/7;
+		green.x = getWidth()/2; //this is constant throughout
+		green.y = (getHeight() - green.diameter) - 1;
+		green.bouncedV = false;
+
+		//red ball initial position is random:
+		Random randomgen = new Random();
+		//red ball diameter is between 15-20%-is of smallest:
+		red.diameter = (Math.min(paneSize.width, paneSize.height))/6;
+		red.x = randomgen.nextInt((getWidth() - red.diameter) - 1);
+		red.y = randomgen.nextInt((getHeight() - red.diameter) - 1);
+		//initial direction is randomized too:
+		red.bouncedH = randomgen.nextBoolean();
+		red.bouncedV = randomgen.nextBoolean();
+
+		timer = new Timer(0, this);
+		timer.start();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		shiftH(blue);
+		shiftV(green);
+		shiftH(red);
+		shiftV(red);
+
+		repaint();
+	}
+
+	/**
+	 * Shifts the ball either one direction or the other depending on parameter value:
+	 * only after the ball has hit the border of the panel it starts 
+	 * travelling in the opposite direction. Once it hits the other side of the border, it starts
+	 * travelling in the original direction again. And so on.
+	 * <p>
+	 * @param bounced if false, ball travels positive-ward on the axis specified by 
+	 * the int parameter; if true, negative-ward.
+	 * @param coord either the x or y variable of the calling instance.
+	 * 
+	 * @return The function returns the value opposite to the boolean parameter when 
+	 * the ball hits one of the borders, therefore the parameter is intended 
+	 * to be visible and stored outside the scope of this method AND be 
+	 * reassigned by this method at every call.
+	 * <p>
+	 * Example use:
+	 * Circle2D ball;
+	 * <p>
+	 * ball.x = (getWidth() / 2);
+	 * ball.y = 0;
+	 * ball.bounced = false;
+	 * <p>
+	 * while(!bounced)
+	 * {
+	 * 		ball.shift(bounced, y);
+	 * }
+	 *	<p>
+	 */
+	private void shiftH(Circle2D ball) {
+
+		if(ball.bouncedH)
+			ball.x++;
+		else
+			ball.x--;
+
+		if((ball.x <= 0) || (ball.x + ball.diameter >= getWidth() - 1))
+			ball.bouncedH = !ball.bouncedH;
+		//else
+		//	ball.bounced = ball.bounced;
+	}
+
+	private void shiftV(Circle2D ball) {
+
+		if(ball.bouncedV)
+			ball.y++;
+		else
+			ball.y--;
+
+		if((ball.y <= 0) || (ball.y + ball.diameter >= getHeight() - 1))
+			ball.bouncedV = !ball.bouncedV;
+		//else
+		//	ball.bounced = ball.bounced;
+	}
+
+	@Override
+	public void paint(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2 = (Graphics2D) g;
+
+		//Background has to be repainted with every call of the present method,
+		//otherwise it defaults.
+		//However, setBackground(Color.BLACK); does nothing.
+		//It is necessary to fill a rectangle the size of the content pane:
+		//g2.setColor(Color.BLACK);
+		//g2.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+		//FIXED: with call to super.paintComponent(g);
+
+		//Antialiasing on:
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+
+		//draw blue ball:
+		g2.setColor(Color.BLUE);
+		//g2.drawOval(0, getHeight()/2, diameter, diameter);//optional:drawing border
+		g2.fillOval(blue.x, blue.y, blue.diameter, blue.diameter);
+
+		//draw green ball:
+		g2.setColor(Color.GREEN);
+		g2.fillOval(green.x, green.y, green.diameter, green.diameter);
+
+		//draw red ball:
+		g2.setColor(Color.RED);
+		g2.fillOval(red.x, red.y, red.diameter, red.diameter);
+
+		//draw text:
+		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g2.setColor(Color.WHITE);
+		g2.setFont(new Font("Cambria", Font.BOLD, 15));
+		g2.drawString(
+				"Red: x " + (int)red.getCenterX() + "; y " + (int)red.getCenterY() +
+				" -- Blue: x " + (int)blue.getCenterX() + "; y " + (int)blue.getCenterY() +
+				" -- Green: x " + (int)green.getCenterX() + "; y " + (int)green.getCenterY(), 
+				getWidth() - 525, getHeight() - 10);
+
+		
+		g2.setColor(Color.RED);
+		g2.setFont(new Font("Cambria", Font.BOLD, 15));
+		g2.drawString(collisionsReport(), getWidth() - 525, getHeight() - 25);
+	}
+
+
+
+	private String collisionsReport() {
+		String rvalue = "";
+		if(red.intersects(blue))
+			rvalue += "Red hit blue! ";
+			
+		if(red.intersects(green))
+			rvalue += "Red hit green! ";
+		
+		if(blue.intersects(green))
+			rvalue += "Blue hit green!";
+		
+		return rvalue;
+	}
+}

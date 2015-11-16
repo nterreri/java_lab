@@ -1,0 +1,40 @@
+package uk.ac.ucl.cs.nterreri.XMLProccessing;
+
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+public class XMLParsingErrorHandler implements ErrorHandler {
+
+	@Override
+	public void warning(SAXParseException exception) throws SAXException {
+
+		String customMessage = "Parsing warning occurred at column " + 
+				exception.getColumnNumber() + " on line " + 
+				exception.getLineNumber() + "\n";
+
+		throw new SAXException(customMessage, exception);
+	}
+
+	@Override
+	public void error(SAXParseException exception) throws SAXException {
+
+		String customMessage = "Parsing error occurred at column " + 
+				exception.getColumnNumber() + " on line " + 
+				exception.getLineNumber() + "\n";
+
+		throw new SAXException(customMessage, exception);
+	}
+
+	@Override
+	public void fatalError(SAXParseException exception) throws SAXException {
+
+		String customMessage = "Parsing fatal exception occurred at column " + 
+				exception.getColumnNumber() + " on line " + 
+				exception.getLineNumber() + "\n";
+
+		throw new SAXException(customMessage, exception);
+
+	}
+
+}
